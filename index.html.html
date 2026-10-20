@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Para Emanuelle</title>
+<style>
+  html, body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+    background: radial-gradient(ellipse at center, #3a0010 0%, #12000a 60%, #050002 100%);
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+  #stage { position: absolute; inset: 0; }
+  .w {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    color: #ff3b5c;
+    text-shadow: 0 0 8px #ff0033, 0 0 16px #990019;
+    white-space: nowrap;
+    opacity: 0;
+    transition: left 2.4s cubic-bezier(.2,.7,.2,1), top 2.4s cubic-bezier(.2,.7,.2,1), opacity 1.2s ease;
+    user-select: none;
+  }
+  .w.on { opacity: 1; }
+  .w.formed { animation: beat 1.8s ease-in-out infinite; }
+  @keyframes beat {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(1.12); }
+  }
+  #hint {
+    position: absolute;
+    top: 3%;
+    width: 100%;
+    text-align: center;
+    color: #ff8fa3;
+    font-family: Georgia, serif;
+    font-size: clamp(16px, 4vw, 22px);
+    opacity: 0;
+    transition: opacity 2s ease;
+    pointer-events: none;
+  }
+  #hint.on { opacity: 0.9; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="hint">Para Emanuelle</div>
+
+<script>
+  const names = [
+    "Emanuelle", "Эмануэлле", "エマヌエル", "伊曼纽尔", "إيمانويل",
+    "Εμανουέλ", "इमैनुएल", "에마누엘", "עמנואל", "Emanuèle",
+    "Emanuela", "Emanuelė", "Emanuele", "Эмануэла", "艾曼纽尔",
+    "إيمانوئيل", "Emanuel", "Emmanuelle", "Emanuelá", "Emanuel"
+  ];
+
+  const N = 110;
+  const stage = document.getElementById('stage');
+  const hint = document.getElementById('hint');
+  const elements = [];
+
+  function heartPoint(i, total) {
+    const t = (2 * Math.PI * i) / total;
+    const x = 16 * Math.pow(Math.sin(t), 3);
+    const y = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+    return { x, y };
+  }
+
+  function layout() {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const scaleX = (w * 0.92) / 32;
+    const scaleY = (h * 0.62) / 29;
+    return { cx: w / 2, cy: h * 0.5, scale: Math.min(scaleX, scaleY) };
+  }
+
+  function placeHeart() {
+    const { cx, cy, scale } = layout();
+    const fontBase = Math.max(9, Math.min(15, scale * 0.42));
+    elements.forEach((el, i) => {
+      const p = heartPoint(i, N);
+      el.style.left = (cx + p.x * scale) + 'px';
+      el.style.top = (cy + p.y * scale) + 'px';
+      el.style.fontSize = (fontBase + (i % 2 === 0 ? 2 : 0)) + 'px';
+    });
+    hint.style.top = Math.max(8, cy - scale * 17 - 50) + 'px';
+  }
+
+  for (let i = 0; i < N; i++) {
+    const el = document.createElement('span');
+    el.className = 'w';
+    el.textContent = names[i % names.length];
+    el.style.fontWeight = (i % 2 === 0) ? '700' : '400';
+    el.style.left = (Math.random() * window.innerWidth) + 'px';
+    el.style.top = (Math.random() * window.innerHeight) + 'px';
+    stage.appendChild(el);
+    elements.push(el);
+  }
+
+  placeHeart();
+
+  elements.forEach((el, i) => {
+    setTimeout(() => el.classList.add('on'), 300 + i * 35);
+  });
+
+  const formedAt = 300 + N * 35 + 2400;
+  setTimeout(() => {
+    elements.forEach(el => el.classList.add('formed'));
+    hint.classList.add('on');
+  }, formedAt);
+
+  window.addEventListener('resize', placeHeart);
+</script>
+</body>
+</html>
